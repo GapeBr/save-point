@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Save Point</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f0fa;--panel:#fff;--ink:#1d1833;--mute:#6a6486;--line:#d3cbee;--acc:#6a43ff;--accink:#fff;--star:#e0930b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#120f21;--panel:#1c1833;--ink:#ece8fb;--mute:#9a93bd;--line:#352e5c;--acc:#a692ff;--accink:#150f33;--star:#ffbf47}}
+:root[data-theme="dark"]{--bg:#120f21;--panel:#1c1833;--ink:#ece8fb;--mute:#9a93bd;--line:#352e5c;--acc:#a692ff;--accink:#150f33;--star:#ffbf47}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.45 Nunito,system-ui,sans-serif;min-height:100vh}
+main{max-width:900px;margin:0 auto;padding:16px}
+h1{font:400 44px/1 Bangers,Impact,sans-serif;letter-spacing:.04em;margin:8px 0 4px;color:var(--acc)}
+.stats{color:var(--mute);margin:0 0 14px;font-size:14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+input,select,textarea,button{font:inherit;color:var(--ink)}
+input,select,textarea{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:9px 10px;width:100%}
+.bar input{flex:2 1 180px;width:auto}.bar select{flex:1 1 130px;width:auto}
+button{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:9px 14px;cursor:pointer;font-weight:700}
+button.p{background:var(--acc);border-color:var(--acc);color:var(--accink)}
+button:hover{border-color:var(--acc)}
+:is(button,input,select,textarea):focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:6px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+.cov{aspect-ratio:2/3;width:100%;object-fit:cover;display:block;background:var(--line)}
+.ph{display:flex;align-items:center;justify-content:center;font:400 64px Bangers,Impact,sans-serif;color:var(--mute)}
+.info{padding:8px 10px 10px}
+.t{font-weight:700;line-height:1.25;margin-bottom:4px;overflow-wrap:anywhere}
+.chip{display:inline-block;font-size:12px;font-weight:700;border:1.5px solid var(--acc);color:var(--acc);border-radius:99px;padding:0 8px}
+.chip.fim{border-color:var(--star);color:var(--star)}.chip.drop,.chip.pausa{border-color:var(--mute);color:var(--mute)}
+.ch{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:14px}
+.ch button{padding:0 9px;line-height:26px}.ch span{flex:1;text-align:center}
+.stars{color:var(--star);font-size:15px;letter-spacing:1px}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:36px 0}
+.modal{position:fixed;inset:0;background:rgba(10,8,25,.6);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;z-index:5}
+.modal[hidden]{display:none}
+.sheet{background:var(--bg);border:2px solid var(--acc);border-radius:8px;padding:16px;width:100%;max-width:480px;margin-top:max(8px,env(safe-area-inset-top,0px))}
+.sheet h2{font:400 28px Bangers,Impact,sans-serif;letter-spacing:.04em;margin:0 0 10px;color:var(--acc)}
+label{display:block;font-weight:700;font-size:14px;margin:10px 0 3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.acts .sp{flex:1}
+.cvrow{display:flex;gap:12px;align-items:flex-end}
+.cvrow img,.cvrow .ph{width:80px;aspect-ratio:2/3;object-fit:cover;border-radius:4px;border:2px solid var(--line);font-size:34px;flex:none}
+.hint{color:var(--mute);font-size:13px;margin:4px 0 0}
+#msg{min-height:20px;color:var(--acc);font-weight:700;font-size:14px;margin:0 0 8px}
+textarea{min-height:130px;resize:vertical}
+:root{--bg:#eef1fb;--panel:#fff;--ink:#10152e;--mute:#5b6490;--line:#c5cdf0;--acc:#3d5bff;--acc2:#7a3dff;--accink:#fff;--star:#c47d00;--glow:rgba(61,91,255,.28)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#070a16;--panel:#0e1430;--ink:#e6ebff;--mute:#8791c4;--line:#222c5c;--acc:#4cc9ff;--acc2:#b36bff;--accink:#04101c;--star:#ffd166;--glow:rgba(76,201,255,.4)}}
+:root[data-theme="dark"]{--bg:#070a16;--panel:#0e1430;--ink:#e6ebff;--mute:#8791c4;--line:#222c5c;--acc:#4cc9ff;--acc2:#b36bff;--accink:#04101c;--star:#ffd166;--glow:rgba(76,201,255,.4)}
+body{background:radial-gradient(700px 420px at 100% -5%,var(--glow),transparent 70%),radial-gradient(600px 400px at -10% 35%,rgba(122,61,255,.18),transparent 70%),var(--bg);background-attachment:fixed}
+h1{font:700 40px/1.05 "Chakra Petch",system-ui,sans-serif;letter-spacing:.01em;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent;margin:6px 0 12px}
+.hud{display:flex;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:4px 16px 4px 16px;padding:12px 14px;margin-bottom:12px;box-shadow:0 0 26px var(--glow)}
+.lv{text-align:center;min-width:58px}.lv small{display:block;color:var(--mute);font-size:12px}
+.lv b{font:700 40px/1 "Chakra Petch",sans-serif;color:var(--acc)}
+.xp{flex:1}.xt{display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:14px;margin-bottom:6px}
+.xt span:last-child{color:var(--mute);font-family:"Chakra Petch",sans-serif}
+.xb{height:12px;background:var(--bg);border:1px solid var(--line);border-radius:3px;transform:skewX(-18deg);overflow:hidden}
+.xb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 12px var(--acc);transition:width .6s}
+input,select,textarea{border:1px solid var(--line);border-radius:4px}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--glow)}
+button{border:1px solid var(--line);border-radius:4px;font-family:"Chakra Petch",Nunito,sans-serif;transition:box-shadow .2s,border-color .2s}
+button.p{background:linear-gradient(90deg,var(--acc),var(--acc2));border-color:transparent;color:var(--accink)}
+button.p:hover{box-shadow:0 0 18px var(--glow)}
+.grid{gap:14px}
+.card{border:1px solid var(--line);border-radius:6px 16px 6px 16px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 8px 28px var(--glow)}
+.cw{position:relative}
+.ov{position:absolute;left:0;right:0;bottom:0;padding:36px 10px 8px;background:linear-gradient(transparent,rgba(4,6,18,.92))}
+.ov .t{color:#fff;margin:0;font-size:15px;text-shadow:0 1px 3px #000;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cw .chip{position:absolute;left:8px;top:8px;background:rgba(4,6,18,.78);backdrop-filter:blur(4px)}
+.chip{border-radius:3px;font-family:"Chakra Petch",Nunito,sans-serif}
+.rk{position:absolute;right:6px;top:6px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font:700 15px "Chakra Petch",sans-serif;color:#0b0b1a;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.rS{background:linear-gradient(135deg,#ffe27a,#ff9d2e)}.rA{background:#c79bff}.rB{background:#5fd6ff}.rC{background:#7de39a}.rD{background:#b4b9cf}
+.ph{font:700 64px "Chakra Petch",sans-serif;background:linear-gradient(160deg,var(--line),var(--panel))}
+.ch{margin:0}.ch span{font:700 15px "Chakra Petch",sans-serif}.ch button{border-radius:3px}
+.sheet{background:var(--panel);border:1px solid var(--acc);border-radius:6px 18px 6px 18px;box-shadow:0 0 40px var(--glow)}
+.sheet h2{font:700 24px "Chakra Petch",sans-serif;letter-spacing:0;color:var(--ink);border-left:4px solid var(--acc);padding-left:10px}
+@media (prefers-reduced-motion:reduce){.card,.xb i,button{transition:none}.card:hover{transform:none}}
+.res{background:var(--panel);border:1px solid var(--line);border-radius:6px 14px 6px 14px;padding:10px;margin-top:10px}
+#smartbox:empty{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:4px 12px;border-radius:99px;font-size:14px;font-weight:600}
+.chips button[aria-pressed="true"]{background:linear-gradient(90deg,var(--acc),var(--acc2));color:var(--accink);border-color:transparent}
+.today{color:var(--acc);font-weight:700}
+#today h2,#allh{font:700 20px "Chakra Petch",system-ui,sans-serif;margin:6px 0 10px;color:var(--ink)}
+.sh{display:flex;align-items:baseline;gap:10px}
+#today{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.trow{display:flex;align-items:center;gap:8px}
+.trow>button{padding:10px 12px;font-size:24px;line-height:1}
+.trow>button:disabled{opacity:.35;cursor:default}
+.tgrid{flex:1;min-width:0;display:grid;grid-template-columns:repeat(var(--v,5),minmax(0,1fr));gap:12px;overflow:hidden;padding:4px 2px}
+.tgrid .card{scroll-snap-align:start}
+.gfil{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.gf{display:inline-flex;align-items:center;gap:8px;padding:9px 22px;font-size:16px;font-weight:700;border:1px solid var(--line);border-radius:4px 16px 4px 16px;background:var(--panel);transition:transform .15s,box-shadow .2s,border-color .2s}
+.gf span{font-size:17px;line-height:1}
+.gf:hover{transform:translateY(-2px);border-color:var(--acc)}
+.gf[aria-pressed="true"]{border-color:transparent;transform:translateY(-2px)}
+.gf[data-g="acao"][aria-pressed="true"]{background:linear-gradient(90deg,#ff5d5d,#ff9a3c);color:#1d0900;box-shadow:0 0 20px rgba(255,120,60,.55)}
+.gf[data-g="romance"][aria-pressed="true"]{background:linear-gradient(90deg,#ff4fa0,#b06bff);color:#fff;box-shadow:0 0 20px rgba(255,90,170,.55)}
+@media (prefers-reduced-motion:reduce){.gf,.gf:hover,.gf[aria-pressed="true"]{transition:none;transform:none}}
+.dots{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 12px}
+.dot{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 14px 3px 4px;font-size:14px}
+.dot i{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 6px;border-radius:99px;font:700 14px "Chakra Petch",sans-serif;font-style:normal;color:#10152e}
+.dot span{color:var(--mute);font-weight:700}
+#yday h2{font:700 20px "Chakra Petch",system-ui,sans-serif;margin:6px 0 10px;color:var(--ink)}
+#yday{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+body.inlib main>:not(#libpage):not(h1){display:none!important}
+#libpage h2{font:700 20px "Chakra Petch",system-ui,sans-serif;margin:14px 0 10px;color:var(--ink)}
+.lk{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.55)}
+.lk:hover{border-bottom-color:#fff}
+.lk:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.cw .chip.lendo{background:#3ddc84;border-color:#3ddc84;color:#062b14}
+.cw .chip.quero{background:#b98cff;border-color:#b98cff;color:#1d0a3a}
+.cw .chip.pausa{background:#6bb0ff;border-color:#6bb0ff;color:#08203d}
+.cw .chip.drop{background:#ff6b81;border-color:#ff6b81;color:#3a0510}
+.cw .chip.fim{background:#ffd24d;border-color:#ffd24d;color:#3a2a00}
+.cw .chip.off{background:rgba(4,6,18,.78);color:#fff;border-color:rgba(255,255,255,.5)}
+.ov{padding:28px 8px 8px;background:linear-gradient(transparent,rgba(4,6,18,.6))}
+.ov .t{font:700 14px/1.25 "Chakra Petch",system-ui,sans-serif;color:#fff;text-shadow:none;background:rgba(10,14,36,.84);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);border-left:4px solid var(--acc);border-radius:3px 12px 3px 12px;padding:6px 10px;box-shadow:0 4px 14px rgba(0,0,0,.45);transition:border-color .2s}
+.card:hover .ov .t{border-left-color:var(--acc2)}
+.gts{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:6px}
+.gt{display:inline-flex;align-items:center;gap:4px;font:700 11px/1 "Chakra Petch",system-ui,sans-serif;padding:4px 9px;border-radius:99px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.gt b{font-weight:400;font-size:12px}
+.gt.a{background:linear-gradient(90deg,#ff5d5d,#ff9a3c);color:#1d0900}
+.gt.r{background:linear-gradient(90deg,#ff4fa0,#b06bff)}
+.tabs{display:flex;gap:8px;margin:0 0 14px}
+.tabs button{flex:1;max-width:200px;text-align:center;font-size:16px;padding:10px 14px;border-radius:4px 14px 4px 14px}
+.tabs button[aria-selected="true"]{background:linear-gradient(90deg,var(--acc),var(--acc2));color:var(--accink);border-color:transparent;box-shadow:0 0 18px var(--glow)}
+/* Fluidez e acabamento moderno */
+:root{--ease:cubic-bezier(.22,1,.36,1)}
+html{scroll-behavior:smooth}
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(40% 40% at 18% 18%,var(--glow),transparent 70%),radial-gradient(36% 36% at 82% 72%,rgba(122,61,255,.22),transparent 70%);animation:drift 24s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(4%,3%,0) scale(1.12)}}
+.hud,.dot,.sheet,.bar input,.bar select{background:color-mix(in srgb,var(--panel) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+button{transition:transform .25s var(--ease),box-shadow .3s,border-color .2s,background .3s}
+button:active:not(:disabled){transform:scale(.95)}
+h1{letter-spacing:.02em;filter:drop-shadow(0 4px 18px var(--glow))}
+.tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:320px;padding:4px;border-radius:16px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.tabs::before{content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:12px;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 20px var(--glow);transition:transform .5s var(--ease)}
+.tabs:has(button[data-m="anime"][aria-selected="true"])::before{transform:translateX(100%)}
+.tabs button{max-width:none;position:relative;z-index:1;background:transparent;border:0;box-shadow:none;border-radius:12px;color:var(--mute);transition:color .3s,transform .25s var(--ease)}
+.tabs button[aria-selected="true"]{background:transparent;box-shadow:none;color:var(--accink)}
+.xb i{position:relative;overflow:hidden;transition:width .9s var(--ease)}
+.xb i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-100%);animation:shine 3s ease-in-out infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.dot{transition:transform .3s var(--ease),border-color .2s}
+.dot:hover{transform:translateY(-3px);border-color:var(--acc)}
+.cw{overflow:hidden}
+.card .cov{transition:transform .7s var(--ease)}
+.card:hover .cov{transform:scale(1.07)}
+.card{transition:transform .35s var(--ease),box-shadow .35s,border-color .2s}
+.ov .t{transition:border-color .2s,transform .35s var(--ease)}
+.card:hover .ov .t{transform:translateY(-3px)}
+@keyframes cardin{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+body.enter .card{animation:cardin .6s var(--ease) both}
+body.enter .card:nth-child(2){animation-delay:.05s}body.enter .card:nth-child(3){animation-delay:.1s}body.enter .card:nth-child(4){animation-delay:.15s}body.enter .card:nth-child(5){animation-delay:.2s}body.enter .card:nth-child(6){animation-delay:.25s}body.enter .card:nth-child(n+7){animation-delay:.3s}
+@keyframes slx{from{opacity:0;transform:translateX(var(--dx,24px))}to{opacity:1;transform:none}}
+.tgrid.sl .card{animation:slx .45s var(--ease) both}
+@keyframes fadein{from{opacity:0}}
+@keyframes popin{from{opacity:0;transform:translateY(22px) scale(.96)}to{opacity:1;transform:none}}
+.modal{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal:not([hidden]){animation:fadein .25s ease}
+.modal:not([hidden]) .sheet{animation:popin .45s var(--ease)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.brand{display:flex;align-items:center;gap:12px;background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--acc);filter:none}
+.brand span{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 18px var(--glow))}
+.logo{width:66px;height:66px;flex:none;filter:drop-shadow(0 4px 14px var(--glow));animation:floaty 4.5s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-4px)}}
+body[data-mode="anime"]{--acc:#8a3dff;--acc2:#e0409a;--glow:rgba(190,60,200,.28)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body[data-mode="anime"]{--acc:#c58cff;--acc2:#ff6fb5;--glow:rgba(220,110,230,.4)}}
+:root[data-theme="dark"] body[data-mode="anime"]{--acc:#c58cff;--acc2:#ff6fb5;--glow:rgba(220,110,230,.4)}
+.logo .ring{animation:ringp 3.2s ease-in-out infinite}
+@keyframes ringp{50%{opacity:.55}}
+#fsave.dirty::after{content:"";display:inline-block;width:8px;height:8px;margin-left:8px;border-radius:50%;background:#ff9a3c;box-shadow:0 0 8px #ff9a3c}
+</style>
+</head>
+<body>
+<main>
+  <h1 class="brand">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="lgA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:var(--acc2)"/></linearGradient>
+        <radialGradient id="lgG" cx=".5" cy=".5" r=".5"><stop offset="0" style="stop-color:var(--acc);stop-opacity:.55"/><stop offset="1" style="stop-color:var(--acc);stop-opacity:0"/></radialGradient>
+      </defs>
+      <ellipse cx="32" cy="52" rx="26" ry="7" fill="url(#lgG)"/>
+      <path class="ring" d="M7 52 A25 6.5 0 0 1 57 52" fill="none" stroke="url(#lgA)" stroke-width="3" stroke-linecap="round"/>
+      <g stroke-linejoin="round">
+        <path d="M32 2 L15 20 L32 24Z" fill="url(#lgA)"/><path d="M32 2 L15 20 L32 24Z" fill="#fff" opacity=".4"/>
+        <path d="M32 2 L49 20 L32 24Z" fill="url(#lgA)"/>
+        <path d="M15 20 L32 24 L32 44 L15 40Z" fill="url(#lgA)"/><path d="M15 20 L32 24 L32 44 L15 40Z" fill="#fff" opacity=".14"/>
+        <path d="M49 20 L32 24 L32 44 L49 40Z" fill="url(#lgA)"/><path d="M49 20 L32 24 L32 44 L49 40Z" fill="#000" opacity=".24"/>
+        <path d="M15 40 L32 44 L32 58Z" fill="url(#lgA)"/><path d="M15 40 L32 44 L32 58Z" fill="#000" opacity=".14"/>
+        <path d="M49 40 L32 44 L32 58Z" fill="url(#lgA)"/><path d="M49 40 L32 44 L32 58Z" fill="#000" opacity=".4"/>
+      </g>
+      <path class="ring" d="M7 52 A25 6.5 0 0 0 57 52" fill="none" stroke="url(#lgA)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <span>Save Point</span>
+  </h1>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Tipo de obra"><button type="button" role="tab" data-m="manhwa" aria-selected="true">Manhwas</button><button type="button" role="tab" data-m="anime" aria-selected="false">Animes</button></nav>
+  <section class="hud" aria-label="Seu nível de leitor">
+    <div class="lv"><small>Nível</small><b id="lv">1</b></div>
+    <div class="xp"><div class="xt"><span id="rk">Leitor de rank E</span><span id="xpt">0 / 100 XP</span></div><div class="xb"><i id="xpf"></i></div></div>
+  </section>
+  <div class="dots" id="dots" role="list" aria-label="Resumo por status"></div>
+  <p class="stats" id="stats"></p>
+  <p id="msg" aria-live="polite"></p>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Buscar por qualquer título, gênero ou site" aria-label="Buscar">
+    <select id="fs" aria-label="Filtrar por status"></select>
+    <select id="so" aria-label="Ordenar">
+      <option value="u">Mais recentes</option>
+      <option value="t">Título (A–Z)</option>
+      <option value="r">Maior nota</option>
+      <option value="c">Mais capítulos</option>
+    </select>
+    <button class="p" id="add">Adicionar</button>
+    <button id="lib">Biblioteca</button>
+    <button id="imp">Backup</button>
+    <button class="p" id="fsave" title="Grava suas alterações dentro do arquivo HTML do seu computador">Salvar</button>
+    <button id="sync" title="Mantém a lista igual no PC e no celular">Sincronizar</button>
+  </div>
+  <div class="gfil" id="gfil" role="group" aria-label="Filtrar por gênero"><button type="button" class="gf" data-g="acao" aria-pressed="false"><span aria-hidden="true">⚔</span>Ação</button><button type="button" class="gf" data-g="romance" aria-pressed="false"><span aria-hidden="true">♥</span>Romance</button></div>
+  <div id="smartbox" class="hint" style="margin:-4px 0 10px"></div>
+  <section id="today" hidden>
+    <div class="sh"><h2>Lançam hoje</h2><span class="hint" id="t-count"></span></div>
+    <div class="trow">
+      <button type="button" id="t-prev" aria-label="Ver os anteriores">‹</button>
+      <div class="tgrid" id="tgrid"></div>
+      <button type="button" id="t-next" aria-label="Ver os próximos">›</button>
+    </div>
+  </section>
+  <section id="yday" hidden>
+    <div class="sh"><h2>Saiu ontem, ainda não lido</h2><span class="hint" id="y-count"></span></div>
+    <div class="trow">
+      <button type="button" id="y-prev" aria-label="Ver os anteriores">‹</button>
+      <div class="tgrid" id="ygrid"></div>
+      <button type="button" id="y-next" aria-label="Ver os próximos">›</button>
+    </div>
+  </section>
+  <h2 id="allh" hidden>Todos os manhwas</h2>
+  <div class="grid" id="grid"></div>
+  <section id="libpage" hidden>
+    <button type="button" id="lp-back">‹ Voltar à estante</button>
+    <h2>Biblioteca</h2>
+    <div class="bar">
+      <input id="lp-q" type="search" placeholder="Buscar em qualquer idioma" aria-label="Buscar na biblioteca">
+      <select id="lp-so" aria-label="Ordenar"><option value="az">A–Z</option><option value="za">Z–A</option><option value="rec">Mais recentes</option><option value="cap">Mais capítulos lidos</option><option value="nota">Maior nota</option></select>
+      <select id="lp-st" aria-label="Filtrar"><option value="">Todas as obras</option><option value="on">Na minha estante</option><option value="off">Fora da estante</option><option value="lendo">Lendo</option><option value="fim">Concluído</option><option value="pausa">Em pausa</option><option value="drop">Abandonado</option><option value="quero">Quero ler</option></select>
+    </div>
+    <div class="chips" id="lp-g" role="group" aria-label="Filtrar por gênero" style="margin-bottom:12px"></div>
+    <p class="hint" id="lp-n"></p>
+    <div class="grid" id="lp-grid"></div>
+  </section>
+</main>
+
+<div class="modal" id="m1" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <h2 id="mt">Novo manhwa</h2>
+    <label for="f-t">Título</label><input id="f-t">
+    <label for="f-a">Outros títulos</label><input id="f-a" placeholder="Ex.: Solo Leveling, Eu Sozinho Subo de Nível">
+    <p class="hint">Separe os nomes alternativos com vírgula. A busca acha o manhwa por qualquer um deles.</p>
+    <button type="button" id="suggest">Preencher nomes da biblioteca</button>
+    <label>Capa</label>
+    <div class="cvrow">
+      <div id="prev"></div>
+      <div style="flex:1">
+        <input type="file" id="f-cov" accept="image/*" aria-label="Escolher imagem da capa">
+        <button id="cov-x" style="margin-top:6px">Remover capa</button>
+      </div>
+    </div>
+    <p class="hint">Escolha uma imagem do aparelho. Salve a capa do site e envie aqui.</p>
+    <div class="two">
+      <div><label for="f-st">Status</label><select id="f-st"></select></div>
+      <div><label for="f-ch">Capítulo atual</label><input id="f-ch" type="number" min="0" step="1"></div>
+      <div><label for="f-r">Nota</label><select id="f-r"></select></div>
+      <div><label for="f-site">Onde leio</label><input id="f-site" placeholder="Ex.: Mediocrescan"></div>
+    </div>
+    <label for="f-lk">Link do manhwa</label><input id="f-lk" type="url" inputmode="url" autocomplete="off" placeholder="https://site-da-scan.com/manhwa">
+    <label id="dl">Dia de lançamento de capítulo</label><div class="chips" id="dchips" role="group" aria-labelledby="dl"></div>
+    <label id="gl">Gêneros</label><input id="f-g" type="hidden"><div class="chips" id="gchips" role="group" aria-labelledby="gl"></div>
+    <div class="cvrow" style="margin-top:8px;align-items:center"><input id="f-g2" placeholder="Outro gênero" aria-label="Outro gênero"><button type="button" id="g-add">Adicionar</button></div>
+    <label for="f-n">Anotações</label><textarea id="f-n" style="min-height:70px"></textarea>
+    <div class="acts">
+      <button class="p" id="save">Salvar</button>
+      <button id="cancel">Cancelar</button>
+      <span class="sp"></span>
+      <button id="del">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="m2" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="it">
+    <h2 id="it">Backup</h2>
+    <label for="f-imp">Importar: cole sua lista de manhwas ou um backup</label>
+    <textarea id="f-imp" placeholder="Um título por linha. Opcional: Título | capítulo | site"></textarea>
+    
+    <p class="hint">Exportar copia todos os seus manhwas como texto para você guardar. Importar aceita esse texto ou uma lista com um título por linha (opcional: Título | capítulo | site).</p>
+    <div class="acts">
+      <button class="p" id="do-imp">Importar</button>
+      <button id="do-bk">Exportar</button>
+      <button id="imp-x">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="m4" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="syt">
+    <h2 id="syt">Sincronizar</h2>
+    <p class="hint" id="gh-st"></p>
+    <label for="gh-tk">Token do GitHub</label>
+    <input id="gh-tk" type="password" autocomplete="off" placeholder="Cole o token aqui">
+    <p class="hint">O token fica guardado só neste aparelho. Use um token com permissão de Gists (leitura e escrita). Cada aparelho precisa colar o token uma vez.</p>
+    <div class="acts">
+      <button class="p" id="gh-go">Conectar e sincronizar</button>
+      <button id="gh-now">Sincronizar agora</button>
+      <span class="sp"></span>
+      <button id="gh-off">Desconectar</button>
+      <button id="gh-x">Fechar</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="m3" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="lt">
+    <h2 id="lt">Biblioteca</h2>
+    <label for="f-lq">Procure uma obra por qualquer nome</label>
+    <div class="cvrow" style="align-items:center"><input id="f-lq" placeholder="Ex.: o jogador, the player, solo leveling"><button class="p" id="lib-go">Buscar</button></div>
+    <p class="hint">Digite o nome em português, inglês ou coreano, mesmo aproximado ou com erros, e a biblioteca embutida relaciona com a obra. Ela cobre os títulos mais populares: o que não estiver nela você adiciona manualmente.</p>
+    <div id="lib-res"></div>
+    <div class="acts"><button id="lib-x">Fechar</button></div>
+  </div>
+</div>
+<script id="save-data" type="application/json">{"v":1,"t":0,"manhwa":[],"anime":[]}</script>
+<script>
+const $=id=>document.getElementById(id);
+let KEY="manhwas-v1";
+const ST={lendo:"Lendo",fim:"Concluído",pausa:"Em pausa",drop:"Abandonado",quero:"Quero ler"};
+let items=load(),cur=null,cov=null;
+
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(items));return true}catch(e){msg("Não foi possível salvar: o armazenamento do navegador está cheio ou bloqueado.");return false}}
+function msg(t){$("msg").textContent=t;clearTimeout(msg.t);msg.t=setTimeout(()=>$("msg").textContent="",4000)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const norm=s=>String(s||"").normalize("NFD").replace(/\p{M}/gu,"").toLowerCase();
+const RK=["","D","C","B","A","S"];
+const stars=r=>"★".repeat(r)+"☆".repeat(5-r);
+const opts=(el,map,first)=>{el.innerHTML=(first?`<option value="">${first}</option>`:"")+Object.entries(map).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")};
+opts($("fs"),ST,"Todos os status");opts($("f-st"),ST);
+$("f-r").innerHTML='<option value="0">Sem nota</option>'+[1,2,3,4,5].map(n=>`<option value="${n}">${stars(n)}</option>`).join("");
+
+
+function render(){
+  const q=norm($("q").value.trim()),fs=$("fs").value,so=$("so").value;
+  let l=items.filter(i=>(!fs||i.st===fs)&&(!q||match(i,q))&&(!gf.size||(i.g||"").split(",").some(x=>gf.has(norm(x.trim())))));
+  const by={u:(a,b)=>b.u-a.u,t:(a,b)=>a.t.localeCompare(b.t,"pt"),r:(a,b)=>b.r-a.r||a.t.localeCompare(b.t,"pt"),c:(a,b)=>b.ch-a.ch};
+  l.sort(by[so]);
+  if(smartQ!==q)smart=null;
+  if(smart&&!l.length)l=smart.map(id=>items.find(x=>x.id===id)).filter(Boolean);
+  smartBox(q,l);
+  const n=k=>items.filter(i=>i.st===k).length;
+  $("stats").textContent=items.length+" títulos · "+n("lendo")+" lendo · "+n("fim")+" concluídos · "+n("quero")+" para ler · "+items.reduce((s,i)=>s+(i.ch||0),0)+" capítulos lidos";
+  const tot=items.reduce((s,i)=>s+(i.ch||0),0),lv=Math.floor(tot/100)+1,xp=tot%100;
+  $("lv").textContent=lv;$("xpf").style.width=xp+"%";$("xpt").textContent=xp+" / 100 XP";
+  $("rk").textContent="Leitor de rank "+(lv<3?"E":lv<6?"D":lv<10?"C":lv<15?"B":lv<25?"A":"S");
+  $("grid").innerHTML=l.length?l.map(i=>`<article class="card" data-id="${i.id}">
+    <div class="cw">${i.cov?`<img class="cov" alt="Capa de ${esc(i.t)}" src="${i.cov}">`:`<div class="cov ph">${esc(i.t.charAt(0).toUpperCase())}</div>`}${i.r?`<span class="rk r${RK[i.r]}" title="Nota ${i.r} de 5">${RK[i.r]}</span>`:""}<span class="chip ${i.st}">${ST[i.st]}</span><div class="ov"><div class="t">${i.lk?`<a class="lk" href="${esc(i.lk)}" target="_blank" rel="noopener noreferrer">${esc(i.t)} ↗</a>`:esc(i.t)}</div>${gtags(i.g)}</div></div>
+    <div class="info">
+    <div class="ch"><button data-a="dec" aria-label="Voltar um capítulo">−</button><span>Cap. ${i.ch||0}</span><button data-a="inc" aria-label="Avançar um capítulo">+</button></div>
+    
+    ${q&&i.a&&!norm(i.t).includes(q)&&norm(i.a).includes(q)?`<div class="hint">Também: ${esc(i.a)}</div>`:""}${i.site?`<div class="hint">${esc(i.site)}</div>`:""}${i.d&&i.d.length?`<div class="hint${i.d.includes(new Date().getDay())?" today":""}">Lança: ${DO.filter(n=>i.d.includes(n)).map(n=>DN[n]).join(", ")}${i.d.includes(new Date().getDay())?(i.rd===tkey()?" (lido)":" (hoje)"):""}</div>`:""}</div></article>`).join("")
+    :`<div class="empty">${items.length?"Nenhum título com esses filtros.":"Sua estante está vazia. Toque em Adicionar ou importe uma lista."}</div>`;
+}
+
+$("grid").onclick=e=>{
+  if(e.target.closest("a.lk"))return;const card=e.target.closest(".card");if(!card)return;
+  const it=items.find(i=>i.id===card.dataset.id),a=e.target.dataset.a;
+  if(a){
+    it.ch=Math.max(0,(it.ch||0)+(a==="inc"?1:-1));it.u=Date.now();
+    if(a==="inc"&&it.st==="quero")it.st="lendo";
+    const inY=!!e.target.closest("#yday");
+    if(a==="inc"&&inY){it.rl=[...(it.rl||[]),ykey()].slice(-7);grace.add("y"+it.id);setTimeout(()=>{grace.delete("y"+it.id);render()},3000)}
+    else if(a==="inc"&&(it.d||[]).includes(new Date().getDay())){it.rd=tkey();it.rl=[...(it.rl||[]),tkey()].slice(-7);grace.add(it.id);setTimeout(()=>{grace.delete(it.id);render()},3000)}
+    if(a==="dec"){if(e.target.closest("#yday")){it.rl=(it.rl||[]).filter(x=>x!==ykey());if(it.rd===ykey())delete it.rd;grace.delete("y"+it.id)}else{delete it.rd;it.rl=(it.rl||[]).filter(x=>x!==tkey());grace.delete(it.id)}}
+    save();render();return;
+  }
+  openEdit(it);
+};
+
+function setPrev(){
+  $("prev").innerHTML=cov?`<img alt="Prévia da capa" src="${cov}">`:`<div class="ph">?</div>`;
+}
+function openEdit(it){
+  cur=it||null;cov=it?it.cov||null:null;
+  $("mt").textContent=it?"Editar manhwa":"Novo manhwa";
+  $("f-t").value=it?it.t:"";$("f-a").value=it?it.a||"":"";$("f-lk").value=it?it.lk||"":"";$("f-st").value=it?it.st:"lendo";$("f-ch").value=it?it.ch||0:0;
+  $("f-r").value=it?it.r||0:0;$("f-site").value=it?it.site||"":"";$("f-g").value=it?it.g||"":"";$("f-n").value=it?it.n||"":"";
+  $("f-cov").value="";$("del").style.display=it?"":"none";setPrev();
+  $("m1").hidden=false;$("f-t").focus();
+}
+$("add").onclick=()=>openEdit(null);
+$("cancel").onclick=()=>{$("m1").hidden=true};
+$("cov-x").onclick=()=>{cov=null;$("f-cov").value="";setPrev()};
+
+$("f-cov").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const img=new Image(),url=URL.createObjectURL(f);
+  img.onload=()=>{
+    const W=240,H=360,c=document.createElement("canvas");c.width=W;c.height=H;
+    const s=Math.max(W/img.width,H/img.height),w=img.width*s,h=img.height*s;
+    c.getContext("2d").drawImage(img,(W-w)/2,(H-h)/2,w,h);
+    cov=c.toDataURL("image/jpeg",.75);URL.revokeObjectURL(url);setPrev();
+  };
+  img.onerror=()=>msg("Não consegui ler essa imagem. Tente outro arquivo.");
+  img.src=url;
+};
+
+$("save").onclick=()=>{
+  const t=$("f-t").value.trim();
+  if(!t){msg("Digite o título.");$("f-t").focus();return}
+  const d={t,d:cd,lk:fixUrl($("f-lk").value),a:$("f-a").value.trim(),st:$("f-st").value,ch:Math.max(0,parseInt($("f-ch").value)||0),r:+$("f-r").value,site:$("f-site").value.trim(),g:$("f-g").value.trim(),n:$("f-n").value.trim(),cov,u:Date.now()};
+  if(cur)Object.assign(cur,d);else items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...d});
+  if(save()){$("m1").hidden=true;render()}
+};
+$("del").onclick=()=>{
+  if(!cur)return;
+  if($("del").dataset.ok!==cur.id){$("del").dataset.ok=cur.id;$("del").textContent="Confirmar exclusão";return}
+  items=items.filter(i=>i!==cur);save();$("m1").hidden=true;render();
+};
+$("m1").addEventListener("click",e=>{if(e.target.id==="m1")$("m1").hidden=true});
+$("m1").addEventListener("transitionend",()=>{});
+const resetDel=()=>{$("del").dataset.ok="";$("del").textContent="Excluir"};
+$("cancel").addEventListener("click",resetDel);$("save").addEventListener("click",resetDel);$("add").addEventListener("click",resetDel);
+$("grid").addEventListener("click",resetDel);
+
+$("imp").onclick=()=>{$("f-imp").value="";$("m2").hidden=false;$("f-imp").focus()};
+$("imp-x").onclick=()=>{$("m2").hidden=true};
+$("m2").addEventListener("click",e=>{if(e.target.id==="m2")$("m2").hidden=true});
+$("do-bk").onclick=async()=>{
+  const txt=JSON.stringify(items);$("f-imp").value=txt;
+  try{await navigator.clipboard.writeText(txt);msg("Backup copiado.")}catch(e){$("f-imp").select();msg("Copie o texto da caixa para guardar o backup.")}
+};
+$("do-imp").onclick=()=>{
+  const raw=$("f-imp").value.trim();if(!raw)return;
+  let add=[];
+  if(raw[0]==="["){
+    try{add=JSON.parse(raw).filter(i=>i&&i.t)}catch(e){msg("Esse backup não parece válido.");return}
+  }else{
+    add=raw.split("\n").map(l=>l.split("|").map(x=>x.trim())).filter(p=>p[0]).map(p=>({t:p[0],ch:parseInt(p[1])||0,site:p[2]||"",st:"lendo"}));
+  }
+  const have=new Set(items.map(i=>i.t.toLowerCase()));let n=0;
+  add.forEach(a=>{
+    if(have.has(a.t.toLowerCase()))return;
+    have.add(a.t.toLowerCase());n++;
+    items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:a.t,st:ST[a.st]?a.st:"lendo",ch:a.ch||0,r:a.r||0,site:a.site||"",g:a.g||"",n:a.n||"",a:a.a||"",d:Array.isArray(a.d)?a.d:[],lk:fixUrl(a.lk),cov:a.cov||null,u:Date.now()});
+  });
+  save();render();$("m2").hidden=true;msg(n+" títulos adicionados.");
+};
+["q","fs","so"].forEach(id=>$(id).addEventListener("input",render));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("m1").hidden=true;$("m2").hidden=true;$("m3").hidden=true}});
+
+let smart=null,smartQ="",SAMPLE=null;
+const lev=(a,b)=>{let p=Array.from({length:b.length+1},(_,j)=>j);for(let i=1;i<=a.length;i++){const c=[i];for(let j=1;j<=b.length;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[b.length]};
+function match(i,q){
+  const h=norm(i.t+" "+(i.a||"")+" "+(i.g||"")+" "+(i.site||""));
+  if(h.includes(q))return true;
+  const w=h.split(/[\s,;|]+/);
+  return q.split(" ").filter(Boolean).every(t=>h.includes(t)||(t.length>3&&w.some(x=>Math.abs(x.length-t.length)<2&&lev(x,t)<2)));
+}
+const parseJ=t=>{try{const s=String(t).replace(/```json|```/g,"");const a=Math.min(...["[","{"].map(c=>{const k=s.indexOf(c);return k<0?1e9:k}));const e=Math.max(s.lastIndexOf("]"),s.lastIndexOf("}"));return JSON.parse(s.slice(a,e+1))}catch(e){return null}};
+const ask=async p=>parseJ((await SAMPLE(p)).text);
+const errMsg=e=>e&&e.code==="not_granted"?"Permissão negada para usar a IA.":e&&e.code==="rate_limited"?"Muitas buscas seguidas. Espere um pouco.":"A busca por IA falhou. Tente de novo.";
+const LIBP=q=>`Você é um catálogo de manhwas, manhuas, mangás e webtoons. O usuário buscou: "${q}". Ele pode ter escrito em qualquer idioma, traduzido, aproximado ou com erros. Devolva até 5 obras que mais provavelmente correspondem. Responda SOMENTE com JSON, sem markdown, neste formato: [{"titulo":"nome mais conhecido","alternativos":["nomes em inglês, português, coreano e romanização, oficiais ou comuns"],"generos":["gênero"],"obs":"uma frase curta"}]. Se não reconhecer, devolva []. Nunca invente obras.`;
+
+
+function smartBox(q,l){
+  const b=$("smartbox");b.textContent="";
+  if(!q)return;
+  if(smart){b.textContent=smart.length?"Relacionado pela IA com “"+$("q").value.trim()+"”.":"A IA não achou nenhum título parecido na sua estante.";return}
+  if(!l.length&&SAMPLE){const x=document.createElement("button");x.textContent="Nada encontrado. Buscar por significado com IA";x.onclick=runSmart;b.appendChild(x)}
+}
+async function runSmart(){
+  const q0=$("q").value.trim();smartQ=norm(q0);
+  $("smartbox").textContent="Perguntando ao Claude…";
+  try{
+    const j=await ask(`Estante do usuário (JSON): ${JSON.stringify(items.map(i=>({id:i.id,t:i.t,a:i.a||""})))}. Busca: "${q0}". A busca pode estar em outro idioma, traduzida ou com erros. Use seu conhecimento de nomes e traduções de manhwas, manhuas e mangás. Responda SOMENTE com JSON, sem markdown: {"ids":[ids das obras da estante que correspondem, melhor primeiro]}. Se nenhuma corresponder: {"ids":[]}.`);
+    smart=j&&Array.isArray(j.ids)?j.ids:null;
+    if(!smart)msg("Não entendi a resposta da IA. Tente de novo.");
+  }catch(e){smart=null;msg(errMsg(e))}
+  render();
+}
+
+$("lib").onclick=()=>{$("m3").hidden=false;$("f-lq").focus();if(!SAMPLE)$("lib-res").textContent="A busca por IA não está disponível neste navegador."};
+$("lib-x").onclick=()=>{$("m3").hidden=true};
+$("m3").addEventListener("click",e=>{if(e.target.id==="m3")$("m3").hidden=true});
+$("f-lq").addEventListener("keydown",e=>{if(e.key==="Enter")$("lib-go").click()});
+$("lib-go").onclick=async()=>{
+  const q=$("f-lq").value.trim();if(!q||!SAMPLE)return;
+  const box=$("lib-res");box.textContent="Procurando…";
+  try{
+    const l=await ask(LIBP(q));
+    if(!Array.isArray(l)||!l.length){box.textContent="Não reconheci nenhuma obra com esse nome. Tente outro nome ou outro idioma.";return}
+    box.innerHTML="";
+    l.slice(0,5).forEach(r=>{
+      const ex=items.find(i=>[i.t,...(i.a||"").split(",")].some(x=>norm(x.trim())===norm(r.titulo)));
+      const d=document.createElement("div");d.className="res";
+      d.innerHTML=`<div class="t">${esc(r.titulo)}</div><div class="hint">${esc((r.alternativos||[]).join(", "))}</div><div class="hint">${esc((r.generos||[]).join(", "))}${r.obs?" · "+esc(r.obs):""}</div>`;
+      const b=document.createElement("button");b.className=ex?"":"p";b.style.marginTop="8px";b.textContent=ex?"Já está na estante: abrir":"Adicionar à estante";
+      b.onclick=()=>{$("m3").hidden=true;openEdit(ex||null);if(!ex){$("f-t").value=r.titulo||"";$("f-a").value=(r.alternativos||[]).join(", ");$("f-g").value=(r.generos||[]).join(", ")}};
+      d.appendChild(b);box.appendChild(d);
+    });
+  }catch(e){box.textContent=errMsg(e)}
+};
+$("suggest").onclick=async()=>{
+  const t=$("f-t").value.trim(),sg=$("suggest"),old="Sugerir nomes com IA";
+  if(!t||!SAMPLE){sg.textContent="Digite o título primeiro";setTimeout(()=>sg.textContent=old,2500);return}
+  sg.disabled=true;sg.textContent="Buscando…";let res=old;
+  try{
+    const l=await ask(LIBP(t)),r=Array.isArray(l)&&l[0];
+    if(!r)res="Não reconheci esse título";
+    else{
+      const cur=$("f-a").value.split(",").map(x=>x.trim()).filter(Boolean),seen=new Set([norm(t),...cur.map(norm)]);
+      (r.alternativos||[]).concat(r.titulo?[r.titulo]:[]).forEach(x=>{if(!seen.has(norm(x))){seen.add(norm(x));cur.push(x)}});
+      $("f-a").value=cur.join(", ");
+      if(!$("f-g").value.trim()&&r.generos)$("f-g").value=r.generos.join(", ");
+      res="Nomes sugeridos. Confira antes de salvar";
+    }
+  }catch(e){res=errMsg(e)}
+  sg.disabled=false;sg.textContent=res;setTimeout(()=>sg.textContent=old,3500);
+};
+
+/* Biblioteca embutida: funciona sem internet e sem IA */
+const SYN=("player,jogador,jogadora,jogadores,players,gamer,gamers;level,nivel,niveis,lv,lvl;tower,torre;god,deus,gods,deuses;king,rei,reis;queen,rainha;empress,imperatriz;princess,princesa;villain,villainess,vilao,vilas,viloes,vila;return,returned,returns,retorno,retornou,retornar,regresso,regressou,regressor,regression,regressao,volta,voltou;hero,heroi,herois;hunter,cacador,cacadores;sword,espada,blade,lamina;dragon,dragao;demon,demonio,demonios;dungeon,masmorra,calabouco;mount,monte;sect,seita;north,northern,norte;moon,moonlight,lua,luar;sculptor,escultor;reader,leitor;omniscient,onisciente;beginning,inicio,comeco;end,fim;life,vida;second,segunda,segundo;mercenary,mercenario;necromancer,necromante;beauty,beleza;true,verdadeira,verdadeiro;legend,legendary,lenda,lendario;dead,death,morto,mortos,morte;zombie,zumbi;max,maximo,maxima;estate,propriedade;school,escola;solo,sozinho,sozinha").split(";").reduce((m,g)=>{const w=g.split(",");w.forEach(x=>m[x]=w[0]);return m},{});
+const STOP=new Set("o a os as um uma the of de do da dos das e and my meu minha in no na em para to for que who that after i eu voce".split(" "));
+const words=s=>norm(s).split(/[ ,;|.:!?()'’"-]+/).filter(Boolean);
+const key=w=>SYN[w]||(w.length>3&&SYN[w.slice(0,-1)])||w;
+const keys=s=>words(s).filter(w=>!STOP.has(w)).map(key);
+const RAW=[];
+const CAT=RAW.map(e=>{const nm=[e.t,...e.a].map(norm);return{...e,names:nm,k:new Set(nm.flatMap(keys)),raw:nm.join(" ")}});
+function score(qk,K,raw){let m=0;for(const k of qk){if(K.has(k)||raw.includes(k)||(k.length>3&&[...K].some(x=>Math.abs(x.length-k.length)<2&&lev(x,k)<2)))m++}return qk.length?m/qk.length:0}
+function catHits(q,min=1){const qk=keys(q);if(!qk.length)return[];return CAT.map(e=>({e,s:score(qk,e.k,e.raw)})).filter(x=>x.s>=min).sort((a,b)=>b.s-a.s).map(x=>x.e)}
+let hq=null,hv=[];const hits=q=>{if(q!==hq){hq=q;hv=catHits(q)}return hv};
+function match(i,q){
+  const qk=keys(q);if(!qk.length)return norm(i.t).includes(q);
+  const nm=[i.t,...(i.a||"").split(",")].map(x=>norm(x.trim())).filter(Boolean);
+  const K=new Set(nm.flatMap(keys)),raw=norm(i.t+" "+(i.a||"")+" "+(i.g||"")+" "+(i.site||""));
+  if(score(qk,K,raw)===1)return true;
+  return hits(q).some(e=>e.names.some(n=>nm.includes(n)));
+}
+const onShelf=e=>items.find(i=>[i.t,...(i.a||"").split(",")].some(x=>e.names.includes(norm(x.trim()))));
+function addCat(e){
+  const ex=onShelf(e);$("m3").hidden=true;openEdit(ex||null);
+  if(!ex){$("f-t").value=e.t;$("f-a").value=e.a.join(", ");$("f-g").value=e.g.join(", ")}
+}
+function smartBox(q,l){
+  const b=$("smartbox");b.textContent="";
+  if(!q||l.length)return;
+  const h=catHits(q,.5).slice(0,3);if(!h.length)return;
+  b.append("Nada na estante. Parecido na biblioteca: ");
+  h.forEach(e=>{const x=document.createElement("button");x.textContent=e.t;x.style.margin="0 6px 4px 0";x.onclick=()=>addCat(e);b.appendChild(x)});
+}
+$("lib").onclick=()=>{$("m3").hidden=false;$("lib-res").textContent="";$("f-lq").focus()};
+$("lib-go").onclick=()=>{
+  const q=$("f-lq").value.trim(),box=$("lib-res");box.textContent="";
+  if(!q)return;
+  const l=catHits(q,.5).slice(0,6);
+  if(!l.length){box.textContent="Nenhuma obra parecida na biblioteca. Você pode adicionar manualmente.";return}
+  l.forEach(e=>{
+    const ex=onShelf(e),d=document.createElement("div");d.className="res";
+    d.innerHTML=`<div class="t">${esc(e.t)}</div><div class="hint">${esc(e.a.join(", "))}</div><div class="hint">${esc(e.g.join(", "))}</div>`;
+    const b=document.createElement("button");b.className=ex?"":"p";b.style.marginTop="8px";b.textContent=ex?"Já está na estante: abrir":"Adicionar à estante";
+    b.onclick=()=>addCat(e);d.appendChild(b);box.appendChild(d);
+  });
+};
+$("f-lq").addEventListener("input",()=>$("lib-go").click());
+$("suggest").onclick=()=>{
+  const t=$("f-t").value.trim(),sg=$("suggest"),old="Preencher nomes da biblioteca",n=norm(t),h=hits(n);
+  const e=CAT.find(c=>c.names.includes(n))||(h.length===1?h[0]:null);
+  let res="Não achei esse título na biblioteca";
+  if(!t)res="Digite o título primeiro";
+  else if(e){
+    const cur=$("f-a").value.split(",").map(x=>x.trim()).filter(Boolean),seen=new Set([n,...cur.map(norm)]);
+    [e.t,...e.a].forEach(x=>{if(!seen.has(norm(x))){seen.add(norm(x));cur.push(x)}});
+    $("f-a").value=cur.join(", ");if(!$("f-g").value.trim())$("f-g").value=e.g.join(", ");
+    res="Nomes adicionados. Confira antes de salvar";
+  }
+  sg.textContent=res;setTimeout(()=>sg.textContent=old,3000);
+};
+
+/* Gêneros em botões */
+let GEN=["Ação","Aventura","Comédia","Drama","Fantasia","Romance","Terror","Suspense","Artes Marciais","Reencarnação","Regressão","Jogo","Escolar","Sobrenatural","Ficção Científica","Superpoderes","Esportes","Vingança","Sobrevivência","Zumbi","Apocalipse","Caçador","Torre","Psicológico"];
+const gi=$("f-g"),gd=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value");
+const gget=()=>gd.get.call(gi).split(",").map(x=>x.trim()).filter(Boolean);
+const gset=a=>{gd.set.call(gi,a.join(", "));gdraw()};
+function gdraw(){
+  const sel=gget(),box=$("gchips");box.innerHTML="";
+  [...GEN,...sel.filter(x=>!GEN.includes(x))].forEach(g=>{
+    const b=document.createElement("button");b.type="button";b.textContent=g;b.setAttribute("aria-pressed",sel.includes(g));
+    b.onclick=()=>{gset(sel.includes(g)?sel.filter(x=>x!==g):[...sel,g]);[...box.children].find(c=>c.textContent===g)?.focus()};
+    box.appendChild(b);
+  });
+}
+Object.defineProperty(gi,"value",{get(){return gd.get.call(gi)},set(v){gd.set.call(gi,v);gdraw()}});
+const gadd=()=>{const v=$("f-g2").value.trim();if(!v)return;const s=gget();if(!s.some(x=>norm(x)===norm(v)))gset([...s,v]);$("f-g2").value=""};
+$("g-add").onclick=gadd;
+const gf=new Set();
+
+/* Dia de lançamento */
+const DN=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],DO=[1,2,3,4,5,6,0];
+let cd=[];
+function ddraw(){
+  const box=$("dchips");box.innerHTML="";
+  DO.forEach(n=>{
+    const b=document.createElement("button");b.type="button";b.textContent=DN[n];b.setAttribute("aria-pressed",cd.includes(n));
+    b.onclick=()=>{cd=cd.includes(n)?cd.filter(x=>x!==n):[...cd,n];ddraw();box.children[DO.indexOf(n)].focus()};
+    box.appendChild(b);
+  });
+}
+const _oe=openEdit;
+openEdit=function(it){cd=it&&Array.isArray(it.d)?[...it.d]:[];ddraw();_oe(it)};
+
+/* Lançamentos de hoje: 5 por vez, com setas */
+let tp=0;const tkey=()=>new Date().toDateString(),grace=new Set();
+function todayRender(){
+  const g=$("grid"),tg=$("tgrid"),dow=new Date().getDay();
+  const ids=new Set(items.filter(i=>Array.isArray(i.d)&&i.d.includes(dow)&&(i.rd!==tkey()||grace.has(i.id))).map(i=>i.id));
+  const cards=[...g.querySelectorAll(".card")].filter(c=>ids.has(c.dataset.id));
+  cards.forEach(c=>c.remove());
+  $("today").hidden=!cards.length;
+  $("allh").hidden=!cards.length||!g.children.length;
+  if(!cards.length)return;
+  const vis=Math.max(2,Math.min(5,Math.floor(tg.clientWidth/120))),last=Math.max(0,cards.length-vis);tp=Math.max(0,Math.min(tp,last));tg.style.setProperty("--v",vis);
+  tg.innerHTML="";const shown=cards.slice(tp,tp+vis);shown.forEach(c=>tg.appendChild(c));
+  
+  $("t-prev").disabled=tp===0;$("t-next").disabled=tp>=last;
+  $("t-count").textContent=(tp+1)+"–"+(tp+shown.length)+" de "+cards.length;
+}
+const DOTS=[["lendo","Lendo","#3ddc84"],["quero","Quero ler","#b98cff"],["pausa","Em pausa","#6bb0ff"],["drop","Abandonado","#ff6b81"],["fim","Concluído","#ffd24d"]];
+function dotsRender(){
+  const dow=new Date().getDay(),left=items.filter(i=>Array.isArray(i.d)&&i.d.includes(dow)&&i.rd!==tkey()).length;
+  const row=[...DOTS.map(([k,l,c])=>[l,items.filter(i=>i.st===k).length,c]),["Faltam hoje",left,"#ff9a3c"]];
+  $("dots").innerHTML=row.map(([l,n,c])=>`<div class="dot" role="listitem"><i style="background:${c}">${n}</i><span>${l}</span></div>`).join("");
+}
+/* Saiu ontem e ainda não foi lido */
+let ty=0;
+const ykey=()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toDateString()};
+const yids=()=>new Set(items.filter(i=>Array.isArray(i.d)&&i.d.includes((new Date().getDay()+6)%7)&&(!((i.rl||[]).includes(ykey())||i.rd===ykey())||grace.has("y"+i.id))).map(i=>i.id));
+function ydayRender(){
+  const g=$("grid"),yg=$("ygrid"),y=yids();
+  const t=new Set(items.filter(i=>Array.isArray(i.d)&&i.d.includes(new Date().getDay())&&(i.rd!==tkey()||grace.has(i.id))).map(i=>i.id));
+  const orig=[...g.querySelectorAll(".card")].filter(c=>y.has(c.dataset.id));
+  orig.forEach(c=>{if(!t.has(c.dataset.id))c.remove()});
+  $("yday").hidden=!orig.length;
+  if(!orig.length)return;
+  const vis=Math.max(2,Math.min(5,Math.floor(yg.clientWidth/120))),last=Math.max(0,orig.length-vis);
+  ty=Math.max(0,Math.min(ty,last));yg.style.setProperty("--v",vis);
+  yg.innerHTML="";const shown=orig.slice(ty,ty+vis);
+  shown.forEach(c=>yg.appendChild(t.has(c.dataset.id)?c.cloneNode(true):c));
+  $("y-prev").disabled=ty===0;$("y-next").disabled=ty>=last;
+  $("y-count").textContent=(ty+1)+"–"+(ty+shown.length)+" de "+orig.length;
+}
+const _r=render;render=function(){_r();ydayRender();todayRender();dotsRender();$("allh").hidden=($("today").hidden&&$("yday").hidden)||!$("grid").querySelector(".card")};
+$("y-prev").onclick=()=>{ty--;render()};
+$("y-next").onclick=()=>{ty++;render()};
+$("ygrid").onclick=$("grid").onclick;
+
+/* Página da Biblioteca: todas as obras, com ordenação e filtros */
+let lpList=[],lg="";
+function gtags(g){
+  const a=(Array.isArray(g)?g:String(g||"").split(",")).map(x=>norm(x.trim())),t=[];
+  if(a.includes("acao"))t.push('<span class="gt a"><b aria-hidden="true">⚔</b>Ação</span>');
+  if(a.includes("romance"))t.push('<span class="gt r"><b aria-hidden="true">♥</b>Romance</span>');
+  return t.length?'<div class="gts">'+t.join("")+"</div>":"";
+}
+function fixUrl(v){
+  v=(v||"").trim();if(!v)return"";
+  const l=v.toLowerCase();if(!l.startsWith("http://")&&!l.startsWith("https://"))v="https://"+v;
+  try{const u=new URL(v);return(u.protocol==="http:"||u.protocol==="https:")&&u.hostname.includes(".")?u.href:""}catch(e){return""}
+}
+const lpSplit=s=>(s||"").split(",").map(x=>x.trim()).filter(Boolean);
+function lpEntries(){
+  const L=items.map(it=>({t:it.t,a:lpSplit(it.a),g:lpSplit(it.g),it}));
+  CAT.forEach(e=>{if(!onShelf(e))L.push({t:e.t,a:e.a,g:e.g,cat:e})});
+  return L;
+}
+function libRender(){
+  const q=norm($("lp-q").value.trim()),so=$("lp-so").value,st=$("lp-st").value,all=lpEntries();
+  const cnt={};all.forEach(x=>x.g.forEach(g=>{cnt[g]=(cnt[g]||0)+1}));
+  const gs=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b,"pt"));
+  if(lg&&!gs.includes(lg))lg="";
+  const box=$("lp-g");box.innerHTML="";
+  gs.forEach(g=>{const b=document.createElement("button");b.type="button";b.textContent=g;b.setAttribute("aria-pressed",g===lg);b.onclick=()=>{lg=lg===g?"":g;libRender()};box.appendChild(b)});
+  const l=all.filter(x=>(!q||match({t:x.t,a:x.a.join(", "),g:x.g.join(", ")},q))&&(!lg||x.g.includes(lg))&&(!st||(st==="on"?x.it:st==="off"?x.cat:x.it&&x.it.st===st)));
+  const c=x=>x.it||{};
+  const by={az:(a,b)=>a.t.localeCompare(b.t,"pt"),za:(a,b)=>b.t.localeCompare(a.t,"pt"),rec:(a,b)=>(c(b).u||0)-(c(a).u||0),cap:(a,b)=>(c(b).ch||0)-(c(a).ch||0),nota:(a,b)=>(c(b).r||0)-(c(a).r||0)};
+  l.sort((a,b)=>by[so](a,b)||a.t.localeCompare(b.t,"pt"));
+  lpList=l;
+  $("lp-n").textContent=l.length+" obras · "+l.filter(x=>x.it).length+" na estante";
+  $("lp-grid").innerHTML=l.length?l.map((x,i)=>{
+    const it=x.it,cov=it&&it.cov;
+    return `<article class="card" data-i="${i}"><div class="cw">${cov?`<img class="cov" alt="Capa de ${esc(x.t)}" src="${cov}">`:`<div class="cov ph">${esc(x.t.charAt(0).toUpperCase())}</div>`}<span class="chip ${it?it.st:"off"}">${it?ST[it.st]:"Adicionar"}</span>${it&&it.r?`<span class="rk r${RK[it.r]}">${RK[it.r]}</span>`:""}<div class="ov"><div class="t">${it&&it.lk?`<a class="lk" href="${esc(it.lk)}" target="_blank" rel="noopener noreferrer">${esc(x.t)} ↗</a>`:esc(x.t)}</div>${gtags(x.g)}</div></div><div class="info"><div class="hint">${esc(x.g.slice(0,3).join(", "))}</div>${it?`<div class="hint">Cap. ${it.ch||0}</div>`:""}</div></article>`;
+  }).join(""):`<div class="empty">Nenhuma obra com esses filtros.</div>`;
+}
+$("lib").onclick=()=>{document.body.classList.add("inlib");$("libpage").hidden=false;libRender();window.scrollTo(0,0)};
+$("lp-back").onclick=()=>{document.body.classList.remove("inlib");$("libpage").hidden=true;render();window.scrollTo(0,0)};
+["lp-q","lp-so","lp-st"].forEach(id=>$(id).addEventListener("input",libRender));
+$("lp-grid").onclick=e=>{if(e.target.closest("a.lk"))return;const c=e.target.closest(".card");if(!c)return;const x=lpList[+c.dataset.i];if(x.it)openEdit(x.it);else addCat(x.cat)};
+const _r2=render;render=function(){_r2();if(!$("libpage").hidden)libRender()};
+
+/* Abas: Manhwas e Animes, cada uma com seus próprios dados */
+const GEN_M=GEN.slice(),GEN_A=["Ação","Aventura","Comédia","Drama","Fantasia","Romance","Slice of Life","Isekai","Shounen","Seinen","Shoujo","Mecha","Terror","Mistério","Sobrenatural","Ficção Científica","Esportes","Escolar","Música","Psicológico"];
+let MODE="manhwa";const T0=document.title;
+const TR=[["Manhwas","Animes"],["manhwas","animes"],["Manhwa","Anime"],["manhwa","anime"],["Capítulos","Episódios"],["capítulos","episódios"],["Capítulo","Episódio"],["capítulo","episódio"],["Cap. ","Ep. "],["Quero ler","Quero assistir"],["para ler","para assistir"],["Lendo","Assistindo"],["lendo","assistindo"],["Leitor","Espectador"],["lidos","assistidos"],["lido","assistido"],["Onde leio","Onde assisto"]];
+const trs=s=>MODE==="anime"?TR.reduce((t,[a,b])=>t.split(a).join(b),s):s;
+function tr(){
+  document.title=trs(T0);
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+  while((n=w.nextNode())){
+    const p=n.parentElement;if(!p||p.closest("script,textarea,#tabs,.t"))continue;
+    if(n.__o===undefined)n.__o=n.nodeValue;
+    const v=trs(n.__o);if(n.nodeValue!==v)n.nodeValue=v;
+  }
+  document.querySelectorAll("[placeholder],[aria-label]").forEach(el=>{
+    if(el.closest("#tabs"))return;
+    for(const at of ["placeholder","aria-label"]){
+      if(!el.hasAttribute(at))continue;
+      const k="__o_"+at;if(el[k]===undefined)el[k]=el.getAttribute(at);
+      const v=trs(el[k]);if(el.getAttribute(at)!==v)el.setAttribute(at,v);
+    }
+  });
+}
+const _r3=render;render=function(){_r3();tr()};
+const _oe2=openEdit;openEdit=function(it){_oe2(it);tr()};
+function setMode(m){
+  MODE=m;KEY=m==="anime"?"animes-v1":"manhwas-v1";items=load();GEN=m==="anime"?GEN_A:GEN_M;
+  gf.clear();[...$("gfil").children].forEach(x=>x.setAttribute("aria-pressed","false"));
+  $("q").value="";$("fs").value="";tp=0;ty=0;lg="";
+  ["m1","m2","m3"].forEach(id=>{$(id).hidden=true});
+  document.body.classList.remove("inlib");$("libpage").hidden=true;
+  [...$("tabs").children].forEach(b=>b.setAttribute("aria-selected",b.dataset.m===m));
+  try{localStorage.setItem("estante-modo",m)}catch(e){}
+  render();
+}
+$("tabs").onclick=e=>{const b=e.target.closest("button");if(b&&b.dataset.m!==MODE)setMode(b.dataset.m)};
+let M0="manhwa";try{M0=localStorage.getItem("estante-modo")||"manhwa"}catch(e){}
+setMode(M0==="anime"?"anime":"manhwa");
+
+/* Fluidez: entrada dos cards e deslize das filas */
+function playEnter(){document.body.classList.add("enter");clearTimeout(playEnter.t);playEnter.t=setTimeout(()=>document.body.classList.remove("enter"),1100)}
+const _sm=setMode;setMode=function(m){document.body.dataset.mode=m;_sm(m);playEnter()};
+
+/* Salvamento automático: localStorage + cópia no IndexedDB, e grava de novo ao fechar a aba */
+const idb=new Promise(res=>{try{const r=indexedDB.open("save-point",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}});
+const idbSet=(k,v)=>idb.then(d=>d?new Promise(r=>{try{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=()=>r(true);t.onerror=()=>r(false)}catch(e){r(false)}}):false);
+const idbGet=k=>idb.then(d=>d?new Promise(r=>{try{const q=d.transaction("kv").objectStore("kv").get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(undefined)}catch(e){r(undefined)}}):undefined);
+function save(){
+  const j=JSON.stringify(items);let ok=false;
+  try{localStorage.setItem(KEY,j);ok=true}catch(e){}
+  idbSet(KEY,j).then(r=>{if(!ok&&!r)msg("Não foi possível salvar: o navegador bloqueou o armazenamento.")});
+  return true;
+}
+function restoreIdb(){
+  const k=KEY;
+  if(items.length)return;
+  idbGet(k).then(v=>{
+    if(!v||k!==KEY||items.length)return;
+    try{const a=JSON.parse(v);if(Array.isArray(a)&&a.length){items=a;try{localStorage.setItem(k,v)}catch(e){}render()}}catch(e){}
+  });
+}
+const _sm2=setMode;setMode=function(m){_sm2(m);restoreIdb()};
+const flush=()=>{const j=JSON.stringify(items);try{localStorage.setItem(KEY,j)}catch(e){}idbSet(KEY,j)};
+window.addEventListener("pagehide",flush);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flush()});
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+
+/* Salvar dentro do arquivo HTML do computador (Chrome e Edge) */
+const OPEN="<"+'script id="save-data" type="application/json">',CLOSE="<"+"/script>";
+let dirty=false;
+const ts=()=>{try{return+(localStorage.getItem("sp-ts")||0)}catch(e){return 0}};
+function save(){
+  const j=JSON.stringify(items);let ok=false;
+  try{localStorage.setItem(KEY,j);localStorage.setItem("sp-ts",Date.now());ok=true}catch(e){}
+  idbSet(KEY,j).then(r=>{if(!ok&&!r)msg("Não foi possível salvar: o navegador bloqueou o armazenamento.")});
+  dirty=true;$("fsave").classList.add("dirty");try{localStorage.setItem("sp-pend","1")}catch(e){}schedulePush();
+  return true;
+}
+try{
+  const d=JSON.parse($("save-data").textContent||"{}");
+  if(d&&d.t>ts()&&((d.manhwa&&d.manhwa.length)||(d.anime&&d.anime.length))){
+    const a=JSON.stringify(d.manhwa||[]),b=JSON.stringify(d.anime||[]);
+    localStorage.setItem("manhwas-v1",a);localStorage.setItem("animes-v1",b);localStorage.setItem("sp-ts",d.t);
+    idbSet("manhwas-v1",a);idbSet("animes-v1",b);
+    items=load();render();
+  }
+}catch(e){}
+async function allData(){
+  const o={v:1,t:Date.now(),manhwa:[],anime:[]};
+  for(const [m,k] of [["manhwa","manhwas-v1"],["anime","animes-v1"]]){
+    if(k===KEY){o[m]=items;continue}
+    let v=null;try{v=localStorage.getItem(k)}catch(e){}
+    if(!v)v=await idbGet(k);
+    try{o[m]=JSON.parse(v||"[]")}catch(e){}
+  }
+  return o;
+}
+async function okPerm(h){const o={mode:"readwrite"};return(await h.queryPermission(o))==="granted"||(await h.requestPermission(o))==="granted"}
+async function saveToFile(){
+  if(!window.showOpenFilePicker){msg("Este navegador não grava no arquivo. Use o Chrome ou o Edge, ou o botão Backup.");return}
+  try{
+    let h=await idbGet("fh");
+    if(h&&!(await okPerm(h).catch(()=>false)))h=null;
+    if(!h){
+      [h]=await showOpenFilePicker({types:[{description:"Arquivo HTML do Save Point",accept:{"text/html":[".html",".htm"]}}]});
+      await idbSet("fh",h);
+      try{localStorage.setItem("sp-fh","1")}catch(e){}
+      if(!(await okPerm(h))){msg("Sem permissão para gravar no arquivo.");return}
+    }
+    const txt=await(await h.getFile()).text(),i=txt.indexOf(OPEN),j=i<0?-1:txt.indexOf(CLOSE,i);
+    if(i<0||j<0){msg("Esse arquivo não tem o salvamento. Baixe a versão atualizada e escolha ela.");return}
+    const d=await allData(),json=JSON.stringify(d).split("<").join(String.fromCharCode(92)+"u003c");
+    const w=await h.createWritable();await w.write(txt.slice(0,i+OPEN.length)+json+txt.slice(j));await w.close();
+    try{localStorage.setItem("sp-ts",d.t)}catch(e){}
+    dirty=false;$("fsave").classList.remove("dirty");
+    msg("Salvo no arquivo às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+".");
+  }catch(e){
+    if(e&&e.name==="AbortError")return;
+    msg("Não consegui gravar no arquivo. Abra o arquivo HTML baixado no Chrome ou no Edge e tente de novo.");
+  }
+}
+$("fsave").onclick=saveToFile;
+
+/* Sincronização com o GitHub: um Gist secreto guarda a lista para PC e celular */
+const GHD="Save Point (dados)",GHF="save-point.json";
+const ghc=()=>{try{return{tk:localStorage.getItem("sp-gh-token")||"",id:localStorage.getItem("sp-gh-gist")||""}}catch(e){return{tk:"",id:""}}};
+const ghSet=(k,v)=>{try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}};
+const isPend=()=>{try{return localStorage.getItem("sp-pend")==="1"}catch(e){return false}};
+async function ghApi(path,opt){
+  const o=opt||{},h={Accept:"application/vnd.github+json",Authorization:"Bearer "+ghc().tk,"X-GitHub-Api-Version":"2022-11-28"};
+  if(o.body)h["Content-Type"]="application/json";
+  const r=await fetch("https://api.github.com"+path,{method:o.method||"GET",headers:h,body:o.body});
+  if(!r.ok){const e=new Error("HTTP "+r.status);e.status=r.status;throw e}
+  return r.json();
+}
+async function ghFindGist(){
+  for(let p=1;p<=3;p++){
+    const l=await ghApi("/gists?per_page=100&page="+p),g=l.find(x=>x.description===GHD&&x.files&&x.files[GHF]);
+    if(g)return g.id;
+    if(l.length<100)break;
+  }
+  return "";
+}
+async function ghRead(id){
+  const g=await ghApi("/gists/"+id),f=g.files&&g.files[GHF];
+  if(!f)return null;
+  const txt=f.truncated?await(await fetch(f.raw_url)).text():f.content;
+  return JSON.parse(txt||"{}");
+}
+async function ghWrite(id,d){
+  const files={};files[GHF]={content:JSON.stringify(d)};
+  if(id)return(await ghApi("/gists/"+id,{method:"PATCH",body:JSON.stringify({files})})).id;
+  return(await ghApi("/gists",{method:"POST",body:JSON.stringify({description:GHD,public:false,files})})).id;
+}
+let ghBusy=false,spT=0;
+const hhmm=()=>new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+const ghStatus=t=>{$("gh-st").textContent=t};
+function schedulePush(){clearTimeout(spT);if(ghc().tk)spT=setTimeout(()=>syncNow(false),2500)}
+async function syncNow(manual){
+  const c=ghc();
+  if(!c.tk||ghBusy)return;
+  ghBusy=true;let ok=false;
+  try{
+    let id=c.id;
+    if(!id){id=await ghFindGist();if(id)ghSet("sp-gh-gist",id)}
+    const cloud=id?await ghRead(id):null;
+    if(cloud&&cloud.t>ts()){
+      const a=JSON.stringify(cloud.manhwa||[]),b=JSON.stringify(cloud.anime||[]);
+      try{localStorage.setItem("manhwas-v1",a);localStorage.setItem("animes-v1",b);localStorage.setItem("sp-ts",cloud.t);localStorage.removeItem("sp-pend")}catch(e){}
+      idbSet("manhwas-v1",a);idbSet("animes-v1",b);
+      items=load();render();
+      ghStatus("Atualizado com a nuvem às "+hhmm()+".");if(manual)msg("Lista atualizada com a nuvem.");
+    }else if(!cloud||isPend()||(manual&&(cloud.t||0)<ts())){
+      const d=await allData();
+      id=await ghWrite(id,d);ghSet("sp-gh-gist",id);
+      try{localStorage.setItem("sp-ts",d.t);localStorage.removeItem("sp-pend")}catch(e){}
+      ghStatus("Enviado para a nuvem às "+hhmm()+".");if(manual)msg("Lista enviada para a nuvem às "+hhmm()+".");
+    }else ghStatus("Tudo em dia ("+hhmm()+").");
+    ok=true;
+  }catch(e){
+    const m=e&&(e.status===401||e.status===403)?"O GitHub recusou o token. Confira se ele tem a permissão de Gists.":"Não consegui falar com o GitHub. Verifique a internet.";
+    ghStatus(m);if(manual)msg(m);
+  }
+  ghBusy=false;
+  if(ok&&isPend())schedulePush();
+}
+function openSync(){$("gh-tk").value="";ghStatus(ghc().tk?"Conectado. Cole outro token só se quiser trocar.":"Ainda não conectado.");$("m4").hidden=false;$("gh-tk").focus()}
+$("sync").onclick=openSync;
+$("gh-go").onclick=async()=>{
+  const t=$("gh-tk").value.trim();if(t)ghSet("sp-gh-token",t);
+  if(!ghc().tk){ghStatus("Cole o token do GitHub.");return}
+  ghStatus("Conectando…");await syncNow(true);
+};
+$("gh-now").onclick=()=>{if(!ghc().tk){ghStatus("Cole o token e toque em Conectar.");return}ghStatus("Sincronizando…");syncNow(true)};
+$("gh-off").onclick=()=>{ghSet("sp-gh-token","");ghSet("sp-gh-gist","");ghStatus("Desconectado deste aparelho. Os dados continuam guardados no GitHub.")};
+$("gh-x").onclick=()=>{$("m4").hidden=true};
+$("m4").addEventListener("click",e=>{if(e.target.id==="m4")$("m4").hidden=true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("m4").hidden=true});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")syncNow(false)});
+setTimeout(()=>syncNow(false),800);
+window.addEventListener("beforeunload",e=>{let u=null;try{u=localStorage.getItem("sp-fh")}catch(x){}if(dirty&&u){e.preventDefault();e.returnValue=""}});
+restoreIdb();
+document.body.dataset.mode=MODE;
+{const f=$("lib").onclick;$("lib").onclick=()=>{f();playEnter()}}
+{const f=$("lp-back").onclick;$("lp-back").onclick=()=>{f();playEnter()}}
+[["t-prev","tgrid",-1],["t-next","tgrid",1],["y-prev","ygrid",-1],["y-next","ygrid",1]].forEach(([b,g,d])=>{
+  const f=$(b).onclick;
+  $(b).onclick=()=>{f();const el=$(g);el.style.setProperty("--dx",d*28+"px");el.classList.remove("sl");void el.offsetWidth;el.classList.add("sl")};
+});
+playEnter();
+$("t-prev").onclick=()=>{tp--;render()};
+$("t-next").onclick=()=>{tp++;render()};
+$("tgrid").onclick=$("grid").onclick;
+window.addEventListener("resize",()=>render());
+$("gfil").onclick=e=>{const b=e.target.closest("button");if(!b)return;const g=b.dataset.g,on=!gf.has(g);gf.clear();if(on)gf.add(g);[...$("gfil").children].forEach(x=>x.setAttribute("aria-pressed",x.dataset.g===g&&on));render()};
+$("f-g2").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();gadd()}});
+gdraw();
+render();
+</script>
+</body>
+</html>
